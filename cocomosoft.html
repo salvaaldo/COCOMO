@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estimación COCOMO I</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f7f7f7;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+        input, select, button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Estimación COCOMO I</h1>
+        <form id="cocomoForm">
+            <label for="entrada">Flujo de Entrada:</label>
+            <input type="number" id="entrada" placeholder="Ingrese el flujo de entrada" required>
+
+            <label for="salida">Flujo de Salida:</label>
+            <input type="number" id="salida" placeholder="Ingrese el flujo de salida" required>
+
+            <label for="tipo">Tipo de Proyecto:</label>
+            <select id="tipo" required>
+                <option value="">Seleccione...</option>
+                <option value="ORGANICO">Orgánico</option>
+                <option value="SEMI_ACOPLADO">Semi-Acoplado</option>
+                <option value="ACOPLADO">Acoplado</option>
+            </select>
+
+            <label for="salario">Salario (Bs):</label>
+            <input type="number" id="salario" placeholder="Ingrese el salario mensual" required>
+
+            <button type="button" onclick="calcularCOCOMO()">Calcular</button>
+        </form>
+        <div id="resultado" class="results"></div>
+    </div>
+
+    <script>
+        function calcularCOCOMO() {
+            // Obtener valores ingresados
+            const entrada = parseFloat(document.getElementById('entrada').value);
+            const salida = parseFloat(document.getElementById('salida').value);
+            const tipo = document.getElementById('tipo').value;
+            const salario = parseFloat(document.getElementById('salario').value);
+
+            if (!entrada || !salida || !tipo || !salario) {
+                alert('Por favor, completa todos los campos.');
+                return;
+            }
+
+            // Calcular flujo total
+            const totalFlujo = entrada + salida;
+
+            // Calcular LDC según el tipo
+            let ldc;
+            if (tipo === "ORGANICO") {
+                ldc = totalFlujo * 80;
+            } else if (tipo === "SEMI_ACOPLADO") {
+                ldc = totalFlujo * 81;
+            } else if (tipo === "ACOPLADO") {
+                ldc = totalFlujo * 102;
+            }
+
+            // Calcular MLDC, esfuerzo, tiempo, etc.
+            const mldc = ldc / 1000;
+            const esfuerzo = 3.2 * Math.pow(mldc, 1.05);
+            const tiempoDesarrollo = 2.5 * Math.pow(esfuerzo, 0.38);
+            const productividad = ldc / esfuerzo;
+            const personalNecesario = esfuerzo / tiempoDesarrollo;
+            const costoSoftware = salario * esfuerzo;
+            const costoLDC = costoSoftware / ldc;
+
+            // Mostrar resultados
+            document.getElementById('resultado').innerHTML = `
+                <p><strong>Total de flujo de entradas y salidas:</strong> ${totalFlujo}</p>
+                <p><strong>LDC:</strong> ${ldc}</p>
+                <p><strong>MLDC:</strong> ${mldc.toFixed(2)}</p>
+                <p><strong>Esfuerzo nominal (en personas-mes):</strong> ${esfuerzo.toFixed(2)}</p>
+                <p><strong>Tiempo de desarrollo (en meses):</strong> ${tiempoDesarrollo.toFixed(2)}</p>
+                <p><strong>Productividad (LDC/persona-mes):</strong> ${productividad.toFixed(2)}</p>
+                <p><strong>Personal necesario:</strong> ${personalNecesario.toFixed(2)}</p>
+                <p><strong>Costo del software:</strong> Bs ${costoSoftware.toFixed(2)}</p>
+                <p><strong>Costo por LDC:</strong> Bs ${costoLDC.toFixed(2)}</p>
+            `;
+        }
+    </script>
+</body>
+</html>
